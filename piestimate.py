@@ -2,7 +2,7 @@ import ray
 import math
 import time
 import random
-
+from ProgressActor import ProgressActor
 """
 Following Tutorial From:
     https://docs.ray.io/en/latest/ray-core/examples/monte_carlo_pi.html#monte-carlo-pi
@@ -10,21 +10,7 @@ Following Tutorial From:
 """
 
 @ray.remote
-class ProgressActor:
-    def __init__(self, num_samples: int):
-        self.num_samples = num_samples
-        # maps each task to # of samples completed in that task
-        self.num_samples_completed_per_task = {}
-
-    def report(self, task_id: int, num_samples_finished: int) -> None:
-        self.num_samples_completed_per_task[task_id] = num_samples_finished
-
-    def get_progress(self) -> float:
-        prog_sum = sum(self.num_samples_completed_per_task.values())
-        return prog_sum / self.num_samples
-
-@ray.remote
-def sample(num_samples: int, task_id: int, progress_actor: ray.actor.ActorHandle) -> int:
+def sample_pi(num_samples: int, task_id: int, progress_actor: ray.actor.ActorHandle) -> int:
     num_inside = 0
     for idx in range(num_samples):
         x = random.uniform(-1, 1)
@@ -46,7 +32,7 @@ TOT_NUM_SAMPLES = NUM_SAMPLERS * NUM_SAMPLES_PER
 def main():
     ray.init()
     progress_actor = ProgressActor.remote(TOT_NUM_SAMPLES)
-    res = [sample.remote(NUM_SAMPLES_PER, idx, progress_actor) for idx in range(NUM_SAMPLERS)]
+    res = [sample_pi.remote(NUM_SAMPLES_PER, idx, progress_actor) for idx in range(NUM_SAMPLERS)]
 
     while(True):
         progress = ray.get(progress_actor.get_progress.remote())
