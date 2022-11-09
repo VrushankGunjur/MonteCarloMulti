@@ -6,7 +6,7 @@ from ProgressActor import ProgressActor
 """
 Following Tutorial From:
     https://docs.ray.io/en/latest/ray-core/examples/monte_carlo_pi.html#monte-carlo-pi
-    (all credits to above, not my own work)
+    (all credits to above)
 """
 
 @ray.remote
